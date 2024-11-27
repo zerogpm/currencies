@@ -8,6 +8,7 @@ export default function App() {
   const [toCurrency, setToCurrency] = useState("CNY");
   const [converted, setConverted] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setLoading] = useState(false);
 
   useEffect(() => {
     if (amount > 0) {
