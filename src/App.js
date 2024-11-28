@@ -12,15 +12,14 @@ export default function App() {
   const [debouncedAmount, setDebouncedAmount] = useState(amount);
 
   useEffect(() => {
-
     const timer = setTimeout(() => {
-        setDebouncedAmount(amount);
-      }, 500); // Wait 500ms after last keystroke
-  
-      return () => clearTimeout(timer);
-    }, [amount]);
+      setDebouncedAmount(amount);
+    }, 500); // Wait 500ms after last keystroke
 
-    // Change this useEffect to use debouncedAmount instead of amount
+    return () => clearTimeout(timer);
+  }, [amount]);
+
+  // Change this useEffect to use debouncedAmount instead of amount
   useEffect(() => {
     if (debouncedAmount > 0) {
       async function convert() {
