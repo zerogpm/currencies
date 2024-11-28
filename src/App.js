@@ -9,25 +9,36 @@ export default function App() {
   const [converted, setConverted] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setLoading] = useState(false);
+  const [debouncedAmount, setDebouncedAmount] = useState(amount);
 
   useEffect(() => {
-    if (amount > 0) {
+
+    const timer = setTimeout(() => {
+        setDebouncedAmount(amount);
+      }, 500); // Wait 500ms after last keystroke
+  
+      return () => clearTimeout(timer);
+    }, [amount]);
+
+    // Change this useEffect to use debouncedAmount instead of amount
+  useEffect(() => {
+    if (debouncedAmount > 0) {
       async function convert() {
-
-        // Check if currencies are the same
         if (fromCurrency === toCurrency) {
-            setConverted(amount);
-            setError("");
-            return;
-          }
+          setConverted(debouncedAmount);
+          setError("");
+          return;
+        }
 
+        setLoading(true);
         try {
           setError("");
           const res = await fetch(
-            `https://api.frankfurter.app/latest?amount=${amount}&from=${fromCurrency}&to=${toCurrency}`
+            `https://api.frankfurter.app/latest?amount=${debouncedAmount}&from=${fromCurrency}&to=${toCurrency}`
           );
           const data = await res.json();
-          
+          console.log(data);
+
           if (data.rates && data.rates[toCurrency]) {
             setConverted(data.rates[toCurrency]);
           } else {
@@ -37,6 +48,8 @@ export default function App() {
         } catch (err) {
           setConverted("");
           setError("Failed to convert currency");
+        } finally {
+          setLoading(false);
         }
       }
       convert();
@@ -44,7 +57,7 @@ export default function App() {
       setConverted("");
       setError("Please enter a valid amount");
     }
-  }, [amount, fromCurrency, toCurrency]);
+  }, [debouncedAmount, fromCurrency, toCurrency]); // Changed from amount to debouncedAmount
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
@@ -69,6 +82,7 @@ export default function App() {
         value={fromCurrency}
         onChange={(e) => setFromCurrency(e.target.value)}
         className="converter-select"
+        disabled={isLoading}
       >
         <option value="USD">USD</option>
         <option value="CAD">CAD</option>
@@ -78,6 +92,7 @@ export default function App() {
         value={toCurrency}
         onChange={(e) => setToCurrency(e.target.value)}
         className="converter-select"
+        disabled={isLoading}
       >
         <option value="USD">USD</option>
         <option value="CAD">CAD</option>
